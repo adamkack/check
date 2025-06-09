@@ -1,0 +1,39 @@
+﻿@page "/employes"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using check.Models
+@using check.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<check.Data.checkContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Tidsrapport</h1>
+
+<p>
+    <a href="employes/create">Skapa ny</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Employe">
+    <PropertyColumn Property="employe => employe.Name" />
+    <PropertyColumn Property="employe => employe.Age" />
+    <PropertyColumn Property="employe => employe.Birthday" Title="Date of birth" Format="MM/dd/yyyy"/>
+
+    <TemplateColumn Context="employe">
+        <a href="@($"employes/edit?id={employe.Id}")">Edit</a> |
+        <a href="@($"employes/details?id={employe.Id}")">Details</a> |
+        <a href="@($"employes/delete?id={employe.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+
+@code {
+    private checkContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

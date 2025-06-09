@@ -1,0 +1,32 @@
+﻿@using check.Components.Layout
+@using check.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@inject check.Models.FakeAuthService AuthService
+@inject NavigationManager Navigation
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="OnNavigateAsync">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p>Sorry, there's nothing at this address.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+
+@code {
+    private async Task OnNavigateAsync(NavigationContext args)
+    {
+
+        await Task.Delay(100);
+
+        if (AuthService.CurrentUser is null && !args.Path.StartsWith("login", StringComparison.OrdinalIgnoreCase))
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+    }
+
+}

@@ -1,0 +1,41 @@
+﻿@page "/counter"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using check.Models
+@using check.Data
+@inject IDbContextFactory<check.Data.checkContext> DbFactory
+
+<PageTitle>Counter</PageTitle>
+
+<h3>Total Tid</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <p><strong>Total tid:</strong> @formattedTotal</p>
+}
+
+@code {
+    private string formattedTotal = "";
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var tids = await context.Tid.ToListAsync();
+
+        int totalHours = tids.Sum(t => t.Timmar);
+        int totalMinutes = tids.Sum(t => t.Minuter);
+
+        // Convert extra minutes to hours
+        totalHours += totalMinutes / 60;
+        int remainingMinutes = totalMinutes % 60;
+
+        formattedTotal = $"{totalHours}h {remainingMinutes}m";
+        isLoading = false;
+    }
+}

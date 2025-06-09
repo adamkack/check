@@ -1,0 +1,99 @@
+﻿@page "/employes/edit"
+@using Microsoft.EntityFrameworkCore
+@using check.Models
+@inject IDbContextFactory<check.Data.checkContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Employe</h2>
+<hr />
+@if (Employe is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Employe" OnValidSubmit="UpdateEmploye" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Employe.Id" value="@Employe.Id" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Employe.Name" class="form-control" />
+                    <ValidationMessage For="() => Employe.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="age" class="form-label">Age:</label>
+                    <InputNumber id="age" @bind-Value="Employe.Age" class="form-control" />
+                    <ValidationMessage For="() => Employe.Age" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="birthday" class="form-label">Birthday:</label>
+                    <InputDate id="birthday" @bind-Value="Employe.Birthday" class="form-control" />
+                    <ValidationMessage For="() => Employe.Birthday" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/employes">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Employe? Employe { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Employe ??= await context.Employe.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Employe is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateEmploye()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Employe!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!EmployeExists(Employe!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/employes");
+    }
+
+    private bool EmployeExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Employe.Any(e => e.Id == id);
+    }
+}

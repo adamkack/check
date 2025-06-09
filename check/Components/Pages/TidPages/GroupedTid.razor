@@ -1,0 +1,60 @@
+﻿@page "/groupedtid"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using check.Models
+@using check.Data
+@inject IDbContextFactory<check.Data.checkContext> DbFactory
+<PageTitle>Grouped Tid</PageTitle>
+<h3>Total Tid per Användare och Rubrik</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @foreach (var userGroup in groupedTid)
+    {
+        <h4>Användare: @userGroup.Key</h4>
+        <ul>
+            @foreach (var taskGroup in userGroup.Value)
+            {
+                <li><strong>@taskGroup.Key:</strong> @taskGroup.Value</li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private bool isLoading = true;
+
+    // Dictionary<string, Dictionary<string, string>> = UserId -> Rubrik -> Time
+    private Dictionary<string, Dictionary<string, string>> groupedTid = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        var tids = await context.Tid.ToListAsync();
+
+        groupedTid = tids
+            .GroupBy(t => t.UserId ?? "Unknown")
+            .ToDictionary(
+                userGroup => userGroup.Key,
+                userGroup => userGroup
+                    .GroupBy(t => t.Rubrik ?? "Okänd rubrik")
+                    .ToDictionary(
+                        taskGroup => taskGroup.Key,
+                        taskGroup =>
+                        {
+                            int totalHours = taskGroup.Sum(t => t.Timmar);
+                            int totalMinutes = taskGroup.Sum(t => t.Minuter);
+                            totalHours += totalMinutes / 60;
+                            int remainingMinutes = totalMinutes % 60;
+                            return $"{totalHours}h {remainingMinutes}m";
+                        }
+                    )
+            );
+
+        isLoading = false;
+    }
+}

@@ -1,0 +1,20 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using check.Models
+
+<h1>Welcome</h1>
+<p>You are logged in as @AuthService.CurrentUser</p>
+
+<button class="btn btn-outline-danger" @onclick="Logout">Logout</button>
+
+@code {
+    [Inject] FakeAuthService AuthService { get; set; } = default!;
+    [Inject] NavigationManager Navigation { get; set; } = default!;
+
+    private void Logout()
+    {
+        Console.WriteLine("Logout clicked on home page");
+        AuthService.Logout();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

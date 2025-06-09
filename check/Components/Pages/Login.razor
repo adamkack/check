@@ -1,0 +1,77 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using check.Models
+@implements IDisposable
+@inject FakeAuthService AuthService
+@inject NavigationManager Navigation
+
+<h3>Login</h3>
+
+<p>Current user in service: '@AuthService.CurrentUser'</p>
+
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <InputText id="username" class="form-control" @bind-Value="loginModel.Username" />
+        <ValidationMessage For="@(() => loginModel.Username)" />
+    </div>
+
+    <p>Current input: '@loginModel.Username'</p>
+
+    <button type="submit" class="btn btn-primary">Log in</button>
+</EditForm>
+
+@code {
+    private LoginModel loginModel = new();
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        AuthService.OnChange += HandleAuthChanged;
+    }
+
+    private void HandleLogin()
+    {
+        if (string.IsNullOrWhiteSpace(loginModel.Username))
+        {
+            Console.WriteLine("Starting login...");
+            errorMessage = "Username is required.";
+            return;
+        }
+
+        Console.WriteLine($"Logging in as {loginModel.Username}");
+        AuthService.Login(loginModel.Username);
+    }
+
+    private void HandleAuthChanged()
+    {
+        if (!string.IsNullOrEmpty(AuthService.CurrentUser))
+        {
+            Console.WriteLine("Login succeeded, navigating to /");
+            Navigation.NavigateTo("/");
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnChange -= HandleAuthChanged;
+    }
+
+    public class LoginModel
+    {
+        [Required(ErrorMessage = "Username is required.")]
+        public string? Username { get; set; }
+    }
+}

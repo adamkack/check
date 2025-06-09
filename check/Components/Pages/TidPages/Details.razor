@@ -1,0 +1,54 @@
+﻿@page "/tids/details"
+@using Microsoft.EntityFrameworkCore
+@using check.Models
+@inject IDbContextFactory<check.Data.checkContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Tid</h2>
+    <hr />
+    @if (tid is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Rubrik</dt>
+            <dd class="col-sm-10">@tid.Rubrik</dd>
+            <dt class="col-sm-2">Beskrivning</dt>
+            <dd class="col-sm-10">@tid.Beskrivning</dd>
+            <dt class="col-sm-2">Timmar</dt>
+            <dd class="col-sm-10">@tid.Timmar</dd>
+            <dt class="col-sm-2">Minuter</dt>
+            <dd class="col-sm-10">@tid.Minuter</dd>
+            <dt class="col-sm-2">Datum</dt>
+            <dd class="col-sm-10">@tid.Datum</dd>
+        </dl>
+        <div>
+            <a href="@($"/tids/edit?id={tid.Id}")">Edit</a> |
+            <a href="@($"/tids")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Tid? tid;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        tid = await context.Tid.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (tid is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

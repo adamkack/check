@@ -1,0 +1,69 @@
+﻿@page "/tids/create"
+@using Microsoft.EntityFrameworkCore
+@using check.Models
+@inject IDbContextFactory<check.Data.checkContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Tid</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Tid" OnValidSubmit="AddTid" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="userId" class="form-label">Användare:</label> 
+                <InputText id="userId" @bind-Value="Tid.UserId" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Tid.UserId" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="rubrik" class="form-label">Rubrik:</label> 
+                <InputText id="rubrik" @bind-Value="Tid.Rubrik" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Tid.Rubrik" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="beskrivning" class="form-label">Beskrivning:</label> 
+                <InputText  id="beskrivning" @bind-Value="Tid.Beskrivning" class="form-control" /> 
+                <ValidationMessage For="() => Tid.Beskrivning" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="timmar" class="form-label">Timmar:</label> 
+                <InputNumber id="timmar" @bind-Value="Tid.Timmar" class="form-control" /> 
+                <ValidationMessage For="() => Tid.Timmar" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="minuter" class="form-label">Minuter:</label> 
+                <InputNumber id="minuter" @bind-Value="Tid.Minuter" class="form-control" /> 
+                <ValidationMessage For="() => Tid.Minuter" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="datum" class="form-label">Datum:</label> 
+                <InputDate id="datum" @bind-Value="Tid.Datum" class="form-control" />
+                <ValidationMessage For="() => Tid.Datum" class="text-danger" />
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/tids">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Tid Tid { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddTid()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Tid.Add(Tid);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/tids");
+    }
+}
