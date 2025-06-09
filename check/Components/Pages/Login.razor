@@ -9,9 +9,6 @@
 
 <h3>Login</h3>
 
-<p>Current user in service: '@AuthService.CurrentUser'</p>
-
-
 @if (!string.IsNullOrEmpty(errorMessage))
 {
     <div class="alert alert-danger">@errorMessage</div>
@@ -27,7 +24,6 @@
         <ValidationMessage For="@(() => loginModel.Username)" />
     </div>
 
-    <p>Current input: '@loginModel.Username'</p>
 
     <button type="submit" class="btn btn-primary">Log in</button>
 </EditForm>
@@ -58,7 +54,6 @@
     {
         if (!string.IsNullOrEmpty(AuthService.CurrentUser))
         {
-            Console.WriteLine("Login succeeded, navigating to /");
             Navigation.NavigateTo("/");
         }
         InvokeAsync(StateHasChanged);
