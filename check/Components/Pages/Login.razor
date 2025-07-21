@@ -3,7 +3,6 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
 @using check.Models
-@implements IDisposable
 @inject FakeAuthService AuthService
 @inject NavigationManager Navigation
 
@@ -24,7 +23,6 @@
         <ValidationMessage For="@(() => loginModel.Username)" />
     </div>
 
-
     <button type="submit" class="btn btn-primary">Log in</button>
 </EditForm>
 
@@ -32,36 +30,18 @@
     private LoginModel loginModel = new();
     private string? errorMessage;
 
-    protected override void OnInitialized()
-    {
-        AuthService.OnChange += HandleAuthChanged;
-    }
-
-    private void HandleLogin()
+    private async Task HandleLogin()
     {
         if (string.IsNullOrWhiteSpace(loginModel.Username))
         {
-            Console.WriteLine("Starting login...");
             errorMessage = "Username is required.";
             return;
         }
 
         Console.WriteLine($"Logging in as {loginModel.Username}");
-        AuthService.Login(loginModel.Username);
-    }
+        await AuthService.Login(loginModel.Username);
 
-    private void HandleAuthChanged()
-    {
-        if (!string.IsNullOrEmpty(AuthService.CurrentUser))
-        {
-            Navigation.NavigateTo("/");
-        }
-        InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        AuthService.OnChange -= HandleAuthChanged;
+        Navigation.NavigateTo("/");
     }
 
     public class LoginModel

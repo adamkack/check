@@ -16,5 +16,7 @@ namespace check.Data
 
         public DbSet<check.Models.Employe> Employe { get; set; } = default!;
         public DbSet<check.Models.Tid> Tid { get; set; } = default!;
+        public DbSet<check.Models.UserSession> UserSessions { get; set; } = default!;
+
     }
 }
